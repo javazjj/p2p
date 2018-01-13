@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lxit.p2p.dao.InvestmentDao">
+
+	<resultMap type="com.lxit.p2p.bean.Investment" id="InvestmentDaoMap">
+		<id property="investmentId" column="id" />
+		<result property="buyPortion" column="buyPortion" />
+		<result property="money" column="money" />
+		<result property="registTime" column="registTime" />
+		<result property="startingPortion" column="startingPortion" />
+		<result property="loansState" column="loansState" />
+		<result property="count" column="count" /><!-- 期数 -->
+		<result property="type" column="type" /><!-- 类型 -->
+
+		<result property="creationor" column="creationor" />
+		<result property="creationTime" column="creationTime" />
+		<result property="modifier" column="modifier" />
+		<result property="modificationTime" column="modificationTime" />
+		<result property="postscript" column="postscript" />
+
+		<association property="product" column="productId"
+			select="com.lxit.p2p.dao.ProductDao.queryProduct"></association>
+		<association property="applyLoans" column="applyloansId"
+			select="com.lxit.p2p.dao.ApplyloansDao.queryApplyloans"></association>
+		<association property="user" column="userId"
+			select="com.lxit.p2p.dao.UserDao.queryUserId"></association>
+	</resultMap>
+	
+	<resultMap type="com.lxit.p2p.bean.ManageStatisticsLength" id="ManageStatisticsLengthDaoMap">
+		<id property="manageMoneyMax" column="manageMoneyMax" />
+		<result property="manageMoneyCount" column="manageMoneyCount" />
+		<result property="manageMoneyAlrPri" column="manageMoneyAlrPri" />
+		<result property="manageMoneyStayPri" column="manageMoneyStayPri" />
+		<result property="manageMoneyAlrPriCount" column="manageMoneyAlrPriCount" />
+		<result property="manageMoneyStayPriCount" column="manageMoneyStayPriCount" />
+		
+		<result property="increaseInterest" column="increaseInterest" />		
+		<result property="awaitInterest" column="awaitInterest" />		
+		<result property="ownPrincipal" column="ownPrincipal" />
+		<result property="awaitPrincipal" column="awaitPrincipal" />
+	</resultMap>
+	
+
+
+	<!-- 计算总页数 -->
+	<select id="queryCountInvestment" resultType="int"
+		parameterType="java.util.Map">
+		select count(1) from investment i 
+        <if test=" pagePoStat == '贷款标' ">
+           INNER JOIN applyloans a on i.applyLoansId=a.id 
+        </if>
+            where 1=1
+		<if test="pagePot != null and pagePot !='' and pagePou != null and pagePou !='' ">
+			and i.registTime &gt; #{pagePot} and i.registTime &lt; #{pagePou}
+		</if>
+	    <if test=" loansState == '投标中' ">
+			and a.state in('招标中','已流标')
+	    </if>
+	    <if test=" loansState == '债权转让' ">
+			and i.loansState=#{loansState}
+	    </if>
+	    <if test=" loansState == '承接债权' ">
+			and i.loansState=#{loansState}
+	    </if>
+	    <if test=" loansState == '等待放款' ">
+	   		and a.state in('等待放款','招标完成')
+	    </if>
+	    <if test=" loansState == '回收中' ">
+	        and a.state in('待偿还','逾期未还')
+	    </if>
+	    <if test=" loansState == '已回收' ">
+	       	and a.state in('已还清')
+	    </if>
+		and i.userId=#{userId} and i.type = #{pagePoStat}
+	</select>
+	<!-- 分页查询 -->
+	<select id="queryInvestmentList" resultMap="InvestmentDaoMap"
+		parameterType="java.util.Map">
+		select i.* from investment i 
+        INNER JOIN applyloans a on i.applyLoansId=a.id 
+        where 1=1
+		<if test="pagePot != null and pagePot !='' and pagePou != null and pagePou !='' ">
+		    and i.registTime &gt; #{pagePot} and i.registTime &lt; #{pagePou}
+		</if>
+		<if test=" loansState == '投标中' ">
+			and a.state in('招标中','已流标')
+		</if>
+		<if test=" loansState == '债权转让' ">
+			and i.loansState=#{loansState}
+		</if>
+		<if test=" loansState == '承接债权'">
+			and i.loansState=#{loansState}
+		</if>
+		<if test=" loansState == '等待放款' ">
+		    and a.state in('等待放款','招标完成')
+		</if>
+		<if test=" loansState == '回收中' ">
+		    and a.state in('待偿还','逾期未还')
+		</if>
+		<if test=" loansState == '已回收' ">
+		    and a.state in('已还清')
+		</if>
+		   
+		and i.userId=#{userId} and i.type = #{pagePoStat}
+		limit #{pageIndex},#{pageSize}
+	</select>
+
+	<update id="updateInvestment" parameterType="com.lxit.p2p.bean.Investment">
+		update Investment set
+		<if test=" loansState != null and loansState != '' ">
+			loansState=#{loansState}
+		</if>
+		<if test=" user != null and user != '' ">
+			userId=#{user.userId}
+		</if>
+		where id=#{investmentId}
+	</update>
+	
+	
+	<!-- 计算总页数  回收债权-->
+	<select id="queryCountInvestmentIndex" resultType="int"
+		parameterType="java.util.Map">
+		select count(1) from investment i 
+        INNER JOIN applyloans a on i.applyLoansId=a.id 
+        where 1=1
+		<if test="pagePot != null and pagePot !='' and pagePou != null and pagePou !='' ">
+			and i.registTime &gt; #{pagePot} and i.registTime &lt; #{pagePou}
+		</if>
+		and i.loansState=#{loansState} and a.state in('待偿还','逾期未还','已还清')
+		and i.userId=#{userId} and i.type = #{pagePoStat}
+	</select>
+	<!-- 分页查询 回收债权-->
+	<select id="queryInvestmentListIndex" resultMap="InvestmentDaoMap"
+		parameterType="java.util.Map">
+		select i.* from investment i 
+        INNER JOIN applyloans a on i.applyLoansId=a.id 
+        where 1=1
+		<if test="pagePot != null and pagePot !='' and pagePou != null and pagePou !='' ">
+		    and i.registTime &gt; #{pagePot} and i.registTime &lt; #{pagePou}
+		</if>
+		and i.loansState=#{loansState} and a.state in('待偿还','逾期未还','已还清')
+		and i.userId=#{userId} and i.type = #{pagePoStat}
+		limit #{pageIndex},#{pageSize}
+	</select>
+	
+	
+	<!-- 计算总页数  产品-->
+	<select id="queryCountInvestmentIndexMark" resultType="int"
+		parameterType="java.util.Map">
+		select count(1) from investment
+        where 1=1
+		<if test="pagePot != null and pagePot !='' and pagePou != null and pagePou !='' ">
+			and registTime &gt; #{pagePot} and registTime &lt; #{pagePou}
+		</if>
+		and userId=#{userId} and type = #{pagePoStat}
+	</select>
+	<!-- 分页查询 产品-->
+	<select id="queryInvestmentListIndexMark" resultMap="InvestmentDaoMap"
+		parameterType="java.util.Map">
+		select * from investment
+        where 1=1
+		<if test="pagePot != null and pagePot !='' and pagePou != null and pagePou !='' ">
+		    and registTime &gt; #{pagePot} and registTime &lt; #{pagePou}
+		</if>
+		and userId=#{userId} and type = #{pagePoStat}
+		limit #{pageIndex},#{pageSize}
+	</select>
+
+    <select id="queryManageStatisticsLength" resultMap="ManageStatisticsLengthDaoMap">
+        select
+		(select SUM(money) from investment where userId=#{userId}) as manageMoneyMax,<!--总结出的金额-->
+		
+		(select COUNT(1) from investment where  userId=#{userId}) as manageMoneyCount,<!--总结出的笔数-->
+		
+		(select SUM((select IFNULL(COUNT(1),0) from investment i INNER JOIN applyloans a on i.applyLoansId=a.id 
+		where a.state in('已还清') and i.userId=#{userId}) +
+	    (select IFNULL(COUNT(1),0) from investment i INNER JOIN product p on i.productId=p.id  
+	    where p.state='已结束' and i.userId=#{userId}))) as manageMoneyAlrPriCount,<!-- 已回收的笔数 -->
+	    
+		(select SUM((select IFNULL(COUNT(1),0) from investment i INNER JOIN applyloans a on i.applyLoansId=a.id 
+		 where  a.state != '已还清' and i.userId=#{userId}) + 
+		(select IFNULL(COUNT(1),0) from investment i INNER JOIN product p on i.productId=p.id 
+		where p.state != '已结束' and i.userId=#{userId}))) as manageMoneyStayPriCount,<!-- 待回收的笔数 -->
+		
+		(select SUM((select IFNULL(SUM((i.money*(1+a.rate/100))),0) from investment i INNER JOIN applyloans a on i.applyLoansId=a.id 
+		 where a.state != '已还清' and i.userId=#{userId}) + (select IFNULL(SUM(i.money*(1+CONVERT(p.rate,SIGNED)/100)),0) from investment i
+		 INNER JOIN product p on i.productId=p.id where p.state != '已结束' and i.userId=#{userId}))
+		) as manageMoneyStayPri,<!-- 待回收的本息 -->
+		
+		(select SUM((select IFNULL(SUM((i.money*(1+a.rate/100))),0) from investment i INNER JOIN applyloans a on i.applyLoansId=a.id 
+		 where a.state = '已还清' and i.userId=#{userId})  + (select IFNULL(SUM(i.money*(1+CONVERT(p.rate,SIGNED)/100)),0) from investment i
+		 INNER JOIN product p on i.productId=p.id where p.state = '已结束' and i.userId=#{userId}))
+		) as manageMoneyAlrPriCount,<!-- 已回收的本息 -->
+		
+		
+		(select SUM(
+		   (select SUM((select IFNULL(SUM(i.money*(1+a.rate/100)),0) from investment i INNER JOIN applyloans a on i.applyLoansId=a.id 
+		   where  a.state != '已还清' and i.userId=1) + (select IFNULL(SUM(i.money*(1+CONVERT(p.rate,SIGNED)/100)),0) from investment i 
+		   INNER JOIN product p on i.productId=p.id where p.state != '已结束' and i.userId=1)))
+		    - 
+		   (select SUM((select IFNULL(SUM(i.money),0) from investment i INNER JOIN applyloans a on i.applyLoansId=a.id 
+		    where  a.state != '已还清' and i.userId=1) + (select IFNULL(SUM(i.money),0) from investment i 
+		    INNER JOIN product p on i.productId=p.id where p.state != '已结束' and i.userId=1))) 
+		   ) 
+		 ) awaitInterest , <!-- 待赚利息 -->
+		
+		
+		(select SUM(
+		  (select SUM(
+			   (select IFNULL(SUM((i.money*(1+a.rate/100))),0) from investment i INNER JOIN applyloans a on i.applyLoansId=a.id where a.state = '已还清' and i.userId=#{userId})  +
+			   (select IFNULL(SUM(i.money*(1+CONVERT(p.rate,SIGNED)/100)),0) from investment i INNER JOIN product p on i.productId=p.id where p.state = '已结束' and i.userId=#{userId})))
+			    - 
+			   (select SUM(
+			   (select IFNULL(SUM(i.money),0) from investment i INNER JOIN product p on i.productId=p.id where p.state = '已结束' and i.userId=#{userId}) + 
+			   (select IFNULL(SUM(i.money),0) from investment i INNER JOIN applyloans a on i.applyLoansId=a.id where a.state = '已还清' and i.userId=#{userId})))
+		  )
+		) as increaseInterest ,<!--盈利利息-->
+		
+		(select SUM((select IFNULL(SUM(i.money),0) from investment i INNER JOIN applyloans a on i.applyLoansId=a.id 
+		 where  a.state != '已还清' and i.userId=#{userId}) + (select IFNULL(SUM(i.money),0) from investment i INNER JOIN product p on i.productId=p.id where p.state != '已结束' and i.userId=#{userId})) 
+		) as awaitPrincipal, <!-- 待收本金 -->
+		
+		(select SUM((select IFNULL(SUM(i.money),0) from investment i INNER JOIN applyloans a on i.applyLoansId=a.id 
+		 where a.state = '已还清' and i.userId=1)  + (select IFNULL(SUM(i.money),0) from investment i INNER JOIN product p on i.productId=p.id where p.state = '已结束' and i.userId=1))
+		 ) as ownPrincipal <!-- 已收本金 -->
+    </select>
+    
+
+</mapper>

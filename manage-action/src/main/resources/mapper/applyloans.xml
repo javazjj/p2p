@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lxit.p2p.dao.ApplyloansDao">
+
+	<resultMap type="com.lxit.p2p.bean.Applyloans" id="ApplyLoansDaoMap">
+		<id property="applyLoansId" column="id" />
+		<result property="type" column="type" />
+		<result property="money" column="money" />
+		<result property="deadline" column="deadline" />
+		<result property="rate" column="rate" />
+		<result property="purpose" column="purpose" />
+		<result property="describe" column="describe" />
+		<result property="way" column="way" />
+		<result property="state" column="state" />
+		<result property="time" column="time" />
+		
+		<result property="creater" column="creater" />
+		<result property="creationTime" column="creationTime" />
+		<result property="modifier" column="modifier" />
+		<result property="modificationTime" column="modificationTime" />
+		<result property="postscript" column="postscript" />
+		
+		<association property="user" column="userId"
+			select="com.lxit.p2p.dao.UserDao.queryUserId"></association>
+	</resultMap>
+
+	<select id="queryApplyloans" parameterType="int" resultMap="ApplyLoansDaoMap">
+		select * from applyloans where id=#{applyLoansId}
+	</select>
+
+
+</mapper>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lxit.p2p.dao.DictionariesDao">
+
+	<resultMap type="com.lxit.p2p.bean.Dictionaries" id="DictionariesDaoMap">
+		<id property="dictionariesId" column="id" />
+		<result property="encoding" column="encoding" />
+		<result property="content" column="content" />
+
+		<result property="creationor" column="creationor" />
+		<result property="creationTime" column="creationTime" />
+		<result property="modifier" column="modifier" />
+		<result property="modificationTime" column="modificationTime" />
+		<result property="postscript" column="postscript" />
+
+	</resultMap>
+
+
+	<select id="queryDictionaries" parameterType="int" resultMap="DictionariesDaoMap">
+		select * from dictionaries where id=#{dictionariesId}
+	</select>
+
+    <select id="queryDictionariesList"  resultMap="DictionariesDaoMap" parameterType="java.lang.String">
+        select * from dictionaries
+        where encoding=#{encoding}
+	</select>
+
+</mapper>

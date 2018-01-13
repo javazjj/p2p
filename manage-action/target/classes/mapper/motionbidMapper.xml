@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lxit.p2p.dao.MotionbidDao">
+
+	<resultMap type="com.lxit.p2p.bean.Motionbid" id="MotionbidDaoMap">
+		<id property="motionbidId" column="id" />
+		<result property="rental" column="rental" />
+		<result property="money" column="money" />
+		<result property="rateLow" column="rateLow" />
+		<result property="rateTall" column="rateTall" />
+		<result property="loansLow" column="loansLow" />
+		<result property="loansTall" column="loansTall" />
+		<result property="reputationLow" column="reputationLow" />
+		<result property="reputationTall" column="reputationTall" />
+		<result property="oneFocusBid" column="oneFocusBid" />
+		<result property="reserveBalance" column="reserveBalance" />
+        <result property="switchIlt" column="switchIlt"/>
+
+		<result property="creater" column="creater" />
+		<result property="creationTime" column="creationTime" />
+		<result property="modifier" column="modifier" />
+		<result property="modificationTime" column="modificationTime" />
+		<result property="postscript" column="postscript" />
+
+		<association property="user" column="userId"
+			select="com.lxit.p2p.dao.UserDao.queryUserId"></association>
+		<association property="dictionaries" column="dictionariesId"
+			select="com.lxit.p2p.dao.DictionariesDao.queryDictionaries"></association>
+
+	</resultMap>
+
+	<!-- 查询 -->
+	<select id="queryMotionbid" resultMap="MotionbidDaoMap">
+		select * from motionbid
+	</select>
+
+	<!-- 增加 -->
+	<insert id="addMotionbid" parameterType="com.lxit.p2p.bean.Motionbid">
+		insert into
+		motionbid(rental,money,rateLow,rateTall,loansLow,loansTall,
+		dictionariesId,reputationLow,reputationTall,oneFocusBid,reserveBalance,userId,
+		creater,creationTime,modifier,modificationTime,postscript,switchIlt)
+		value(#{rental},#{money},#{rateLow},#{rateTall},#{loansLow},#{loansTall},
+		#{dictionaries.dictionariesId},#{reputationLow},
+		#{reputationTall},#{oneFocusBid},#{reserveBalance},#{user.userId},1,Now(),1,Now(),"增加操作","关闭")
+	</insert>
+
+    <!-- 计算总页数 -->
+	<select id="queryCountMotionbid" resultType="int" parameterType="java.util.Map">
+        select count(1) from motionbid where userId=#{userId}
+	</select>
+	
+    <!-- 分页查询 -->
+	<select id="queryMapMotionbid"  resultMap="MotionbidDaoMap" parameterType="java.util.Map">
+        select * from motionbid where userId=#{userId}
+        ORDER BY creationTime desc
+        limit #{pageIndex},#{pageSize}
+	</select>
+	
+	<!-- 修改开关 -->
+	<update id="updateMotionbidTime" parameterType="com.lxit.p2p.bean.Motionbid" >
+	   update motionbid set switchIlt=#{switchIlt} where userId=#{userId}
+	</update>
+	
+	<!-- 查询最后一次保存的自动投标记录-->
+	<select id="queryMapMotionbidTime"  resultType="int" resultMap="MotionbidDaoMap">
+        select * from motionbid where userId=#{userId}
+        ORDER BY creationTime desc
+        limit 0,1
+	</select>
+	
+	
+
+</mapper>
+
+

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lxit.p2p.dao.ProductDao">
+
+	<resultMap type="com.lxit.p2p.bean.Product" id="ProductDaoMap">
+		<id property="productId" column="id" />
+		<result property="name" column="name" />
+		<result property="introduce" column="introduce" />
+		<result property="rate" column="rate" />
+		<result property="startTime" column="startTime" />
+		<result property="endTime" column="endTime" />
+		<result property="collectMoney" column="collectMoney" />
+		<result property="lockPeriod" column="lockPeriod" />
+		<result property="state" column="state" />
+		<result property="periods" column="periods" />
+		<result property="modeRepayment" column="modeRepayment" />
+		<result property="startingPortion" column="startingPortion" />
+		
+		<result property="creationor" column="creationor" />
+		<result property="creationTime" column="creationTime" />
+		<result property="modifier" column="modifier" />
+		<result property="modificationTime" column="modificationTime" />
+		<result property="postscript" column="postscript" />
+	</resultMap>
+	
+	
+    <!-- 查询 -->
+	<select id="queryProduct" parameterType="int" resultMap="ProductDaoMap" >
+        select * from product where id=#{productId}
+	</select>
+
+
+</mapper>
